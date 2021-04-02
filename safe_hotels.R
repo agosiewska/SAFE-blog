@@ -1,7 +1,7 @@
 library(ranger)
 library(DALEX)
 library(rSAFE)
-
+library(ggplot2)
 
 hotel_bookings <- read.csv("./data/hotel_bookings.csv", stringsAsFactors = TRUE)
 # remove columns with na values
@@ -63,11 +63,11 @@ test_trans <- safely_transform_data(safe, x_test)
 test_trans_new <- test_trans[,grepl(".*new",colnames(test_trans))]
 
 
-model_lm <- glm(is_canceled~., data = cbind(train_trans_new, is_canceled=y_train), family = "binomial")
-pred_train <- predict(model_lm, train_trans_new)
+model_glm <- glm(is_canceled~., data = cbind(train_trans_new, is_canceled=y_train), family = "binomial")
+pred_train <- predict(model_glm, train_trans_new)
 1 - mltools::auc_roc(y_train, pred_train)
 # 0.6710183
-pred_test <- predict(model_lm, test_trans_new)
+pred_test <- predict(model_glm, test_trans_new)
 1 - mltools::auc_roc(y_test, pred_test)
 # 0.6827459
 
@@ -75,10 +75,9 @@ pred_test <- predict(model_lm, test_trans_new)
 
 
 variables = colnames(train_trans_new)
+plot(safe, variable = gsub("_new", "", variables[17]))
+ggsave("./figs/deposit_type.png", width = 8, height = 3)
 
-i <- 1
-plot(safe, variable = gsub("_new", "", variables[i]))
-i <- i + 1
+plot(safe, variable = gsub("_new", "", variables[4]))
+ggsave("./figs/arrival_date_week_number.png", width = 8, height = 3)
 
-variables[18]
-variables[5]
