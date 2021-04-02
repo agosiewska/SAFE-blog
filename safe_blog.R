@@ -27,7 +27,7 @@ mltools::rmse(train_x$price_log, pred_train$predictions)
 # 0.08907647
 pred_test <- predict(model, test_x)
 mltools::rmse(test_x$price_log, pred_test$predictions)
-# 129575.1
+# 0.1746403
 
 ### Linear model ###
 model_lm1 <- glm(price_log~., data = train_x)
@@ -56,10 +56,10 @@ explain_model <- explain(model,
                          y = exp(train_x$price_log),
                          predict_function = function (x, y)
                            exp(yhat(x, y)))
-
+set.seed(123)
 safe <- safe_extraction(explain_model, response_type = "pdp")
-train_trans <- safely_transform_data(safe, train_x[,-14])
 
+train_trans <- safely_transform_data(safe, train_x[,-14])
 train_trans_new <- train_trans[,grepl(".*new",colnames(train_trans))]
 train_trans_new$waterfront <- train_x$waterfront
 train_trans_new$price_log <- train_x$price_log
@@ -79,7 +79,6 @@ mltools::rmse(exp(test_trans_new$price_log), exp(pred_test))
 # 182619.7
 
 ## log scale
-model_lm <- glm(price_log~., data = train_trans_new)
 pred_train <- predict(model_lm, train_trans_new[,-14])
 mltools::rmse((train_trans_new$price_log), (pred_train))
 # 0.2487476
@@ -87,3 +86,12 @@ mltools::rmse((train_trans_new$price_log), (pred_train))
 pred_test <- predict(model_lm, test_trans_new[,-14])
 mltools::rmse((test_trans_new$price_log), (pred_test))
 # 0.2451518
+
+
+variables = colnames(train_trans_new)
+
+i <- 1
+plot(safe, variable = gsub("_new", "", variables[i]))
+i <- i + 1
+
+variables[i]
